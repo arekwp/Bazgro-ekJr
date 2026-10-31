@@ -13,6 +13,7 @@ interface ScriptingAreaProps {
   onRemoveBlock: (chainId: string, blockIndex: number) => void;
   onDeleteChain: (chainId: string) => void;
   onTestChain: (chain: ScriptChain) => void;
+  onScrollArea?: (e: React.UIEvent<HTMLDivElement>) => void;
 }
 
 export const ScriptingArea: React.FC<ScriptingAreaProps> = ({
@@ -24,15 +25,19 @@ export const ScriptingArea: React.FC<ScriptingAreaProps> = ({
   onRemoveBlock,
   onDeleteChain,
   onTestChain,
+  onScrollArea,
 }) => {
   return (
-    <div className="flex-1 bg-amber-50/90 p-2 sm:p-3 overflow-y-auto select-none min-h-[160px] flex flex-col justify-between">
+    <div
+      onScroll={onScrollArea}
+      className="flex-1 bg-amber-50/90 p-2 sm:p-3 overflow-y-auto select-none min-h-0 flex flex-col justify-between"
+    >
       {/* Script Chains List */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {scripts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-6 text-amber-800/60 font-bold text-center gap-2">
-            <span className="text-3xl">🧩</span>
-            <p className="text-sm">
+          <div className="flex flex-col items-center justify-center py-4 text-amber-800/60 font-bold text-center gap-1.5">
+            <span className="text-2xl">🧩</span>
+            <p className="text-xs sm:text-sm">
               Wybierz bloczek z palety powyżej, aby zaprogramować: <strong className="text-amber-950">{characterName}</strong>
             </p>
           </div>
@@ -40,7 +45,7 @@ export const ScriptingArea: React.FC<ScriptingAreaProps> = ({
           scripts.map((chain, chainIndex) => (
             <div
               key={chain.id}
-              className="flex items-center gap-1 sm:gap-2 p-2 bg-white/70 rounded-2xl border-2 border-amber-200 shadow-xs relative overflow-x-auto min-h-[90px]"
+              className="flex items-center gap-1 sm:gap-2 p-1.5 sm:p-2 bg-white/70 rounded-2xl border-2 border-amber-200 shadow-xs relative overflow-x-auto min-h-[76px] sm:min-h-[86px]"
             >
               {/* Chain Action Controls (Test Play & Delete Chain) */}
               <div className="flex flex-col items-center gap-1 pr-1 border-r border-amber-200 shrink-0">

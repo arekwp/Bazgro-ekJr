@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { Project, ScenePage, CharacterInstance, ScriptBlock, ScriptChain, BlockCategory } from './types/scratch';
 import { STARTER_PROJECTS } from './data/starterProjects';
@@ -15,7 +15,7 @@ import { ScriptingArea } from './components/ScriptingArea';
 import { ParamEditorModal } from './components/NumericKeypad';
 import { ProjectLibrary } from './components/ProjectLibrary';
 import { GuideModal } from './components/GuideModal';
-import { Eye, Code } from 'lucide-react';
+import { Eye, Code, ChevronUp, ChevronDown } from 'lucide-react';
 
 const STORAGE_KEY = 'scratchjr_web_projects_v1';
 
@@ -109,6 +109,10 @@ export default function App() {
 
   // Mobile portrait view mode: 'both' | 'stage' | 'code'
   const [mobileViewTab, setMobileViewTab] = useState<'stage' | 'code'>('stage');
+
+  // Stage size shrink toggle (shrinks stage to ~50% to give maximum space for blocks & scripts in landscape)
+  const [isStageShrunk, setIsStageShrunk] = useState<boolean>(false);
+  const touchStartYRef = useRef<number>(0);
 
   // Active Project Reference
   const currentProject = useMemo(() => {
@@ -901,8 +905,29 @@ export default function App() {
             <div className="flex-1 flex flex-col overflow-hidden">
               {/* Upper Section: Characters (Left), Stage (Center), Scenes (Right) */}
               <div
-                className={`flex overflow-hidden transition-all duration-150 ${
-                  mobileViewTab === 'code' ? 'hidden sm:flex flex-1 sm:flex-none sm:h-[48%]' : 'flex-1 sm:h-[48%]'
+                onWheel={(e) => {
+                  // Scrolling down on the stage area shrinks the stage to 50%!
+                  if (e.deltaY > 12) {
+                    setIsStageShrunk(true);
+                  } else if (e.deltaY < -12) {
+                    setIsStageShrunk(false);
+                  }
+                }}
+                onTouchStart={(e) => {
+                  touchStartYRef.current = e.touches[0].clientY;
+                }}
+                onTouchEnd={(e) => {
+                  const endY = e.changedTouches[0].clientY;
+                  const delta = touchStartYRef.current - endY;
+                  // Swiping up = wants more room for blocks below
+                  if (delta > 25) setIsStageShrunk(true);
+                  // Swiping down = wants larger stage
+                  else if (delta < -25) setIsStageShrunk(false);
+                }}
+                className={`flex overflow-hidden transition-all duration-300 ease-in-out ${
+                  mobileViewTab === 'code' ? 'hidden sm:flex flex-1 sm:flex-none' : 'flex-1'
+                } ${
+                  isStageShrunk ? 'sm:h-[24%]' : 'sm:h-[48%]'
                 }`}
               >
                 {/* Left: Character Selector */}
@@ -942,10 +967,41 @@ export default function App() {
                 />
               </div>
 
+              {/* Tactical Stage Resize / Scroll Handle Bar */}
+              <div className="relative z-20 flex items-center justify-center bg-amber-200/90 border-t border-b border-amber-300 py-0.5 select-none shrink-0 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playPop();
+                    setIsStageShrunk((prev) => !prev);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white hover:bg-amber-100 active:scale-95 text-amber-950 font-black text-[11px] border border-amber-400 shadow-xs transition-transform"
+                  title={
+                    isStageShrunk
+                      ? 'Rozwiń planszę (Większa scena)'
+                      : 'Przewiń w dół lub kliknij, aby zmniejszyć planszę o 50% i powiększyć listę kroków'
+                  }
+                >
+                  {isStageShrunk ? (
+                    <>
+                      <ChevronDown size={14} className="text-amber-800" strokeWidth={3} />
+                      <span>Rozwiń planszę (50% ➔ 100%)</span>
+                    </>
+                  ) : (
+                    <>
+                      <ChevronUp size={14} className="text-amber-800" strokeWidth={3} />
+                      <span>Zmniejsz planszę o 50% (Więcej miejsca na kroki)</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
               {/* Lower Section: Block Palette & Scripting Workbench */}
               <div
-                className={`flex-1 flex flex-col border-t-2 border-amber-300 overflow-hidden ${
-                  mobileViewTab === 'stage' ? 'hidden sm:flex sm:h-[52%]' : 'flex flex-1'
+                className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${
+                  mobileViewTab === 'stage' ? 'hidden sm:flex' : 'flex flex-1'
+                } ${
+                  isStageShrunk ? 'sm:h-[76%]' : 'sm:h-[52%]'
                 }`}
               >
                 {/* Palette */}
@@ -966,6 +1022,11 @@ export default function App() {
                     onRemoveBlock={handleRemoveBlock}
                     onDeleteChain={handleDeleteChain}
                     onTestChain={handleTestChain}
+                    onScrollArea={(e) => {
+                      if (e.currentTarget.scrollTop > 8 && !isStageShrunk) {
+                        setIsStageShrunk(true);
+                      }
+                    }}
                   />
                 )}
               </div>

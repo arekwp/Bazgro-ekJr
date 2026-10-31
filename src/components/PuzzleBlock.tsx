@@ -190,9 +190,9 @@ export const PuzzleBlock: React.FC<PuzzleBlockProps> = ({
   };
 
   // Puzzle SVG geometry
-  // Width: ~64px, Height: ~64px (or 54px in palette)
-  const width = isPalette ? 58 : 66;
-  const height = isPalette ? 56 : 64;
+  // Width: ~62px (52px in palette), Height: ~62px (50px in palette)
+  const width = isPalette ? 52 : 62;
+  const height = isPalette ? 50 : 60;
 
   return (
     <div

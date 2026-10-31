@@ -35,7 +35,7 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
   return (
     <div className="bg-amber-100/90 border-t-2 border-amber-300 flex flex-col shrink-0 select-none shadow-sm">
       {/* Category Tabs */}
-      <div className="flex items-center gap-1 sm:gap-2 px-2 py-1.5 overflow-x-auto border-b border-amber-200">
+      <div className="flex items-center gap-1 sm:gap-2 px-2 py-1 overflow-x-auto border-b border-amber-200">
         {categories.map((cat) => {
           const colors = CATEGORY_COLORS[cat.id];
           const isSelected = selectedCategory === cat.id;
@@ -48,7 +48,7 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
                 sound.playPop();
                 onSelectCategory(cat.id);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs transition-all whitespace-nowrap active:scale-95 shadow-xs ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-xl font-black text-xs transition-all whitespace-nowrap active:scale-95 shadow-xs ${
                 isSelected
                   ? 'scale-105 shadow-md ring-2 ring-white text-white'
                   : 'opacity-70 hover:opacity-100 hover:scale-102 text-white'
@@ -57,7 +57,7 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
                 backgroundColor: isSelected ? colors.activeBg : colors.bg,
               }}
             >
-              <span className="text-sm">{cat.icon}</span>
+              <span className="text-xs sm:text-sm">{cat.icon}</span>
               <span className="drop-shadow-xs">{cat.name.pl}</span>
             </button>
           );
@@ -65,7 +65,7 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
       </div>
 
       {/* Blocks Palette Shelf */}
-      <div className="flex items-center gap-2 sm:gap-3 px-3 py-2 overflow-x-auto min-h-[74px] bg-amber-50/60">
+      <div className="flex items-center gap-2 px-2 sm:px-3 py-1 sm:py-1.5 overflow-x-auto min-h-[64px] sm:min-h-[70px] bg-amber-50/60">
         {currentBlockTypes.map((type) => {
           const def = BLOCK_DEFINITIONS[type];
           const previewBlock = createBlock(type);
