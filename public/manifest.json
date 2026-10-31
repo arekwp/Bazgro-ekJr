@@ -1,0 +1,19 @@
+{
+  "name": "ScratchJr Web - Programowanie dla Dzieci",
+  "short_name": "ScratchJr",
+  "description": "Klon ScratchJr do nauki robotyki i programowania bloczkowego.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FEF3C7",
+  "theme_color": "#F59E0B",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

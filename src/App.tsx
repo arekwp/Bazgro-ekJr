@@ -54,6 +54,59 @@ export default function App() {
   // History stack for Undo functionality (reverting last project modifications)
   const [history, setHistory] = useState<Project[]>([]);
 
+  // Browser Fullscreen state (for hiding mobile address bar)
+  const [isBrowserFullscreen, setIsBrowserFullscreen] = useState<boolean>(false);
+
+  // Sync fullscreen state with document events
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFs = Boolean(
+        document.fullscreenElement ||
+        (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement
+      );
+      setIsBrowserFullscreen(isFs);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  const handleToggleBrowserFullscreen = useCallback(() => {
+    try {
+      const doc = document as unknown as {
+        fullscreenElement?: Element;
+        webkitFullscreenElement?: Element;
+        exitFullscreen?: () => Promise<void>;
+        webkitExitFullscreen?: () => void;
+      };
+      const docEl = document.documentElement as unknown as {
+        requestFullscreen?: () => Promise<void>;
+        webkitRequestFullscreen?: () => void;
+      };
+
+      const isFs = Boolean(doc.fullscreenElement || doc.webkitFullscreenElement);
+      if (!isFs) {
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen().catch(() => {});
+        } else if (docEl.webkitRequestFullscreen) {
+          docEl.webkitRequestFullscreen();
+        }
+      } else {
+        if (doc.exitFullscreen) {
+          doc.exitFullscreen().catch(() => {});
+        } else if (doc.webkitExitFullscreen) {
+          doc.webkitExitFullscreen();
+        }
+      }
+    } catch {
+      // browser prevented or not supported
+    }
+  }, []);
+
   // Mobile portrait view mode: 'both' | 'stage' | 'code'
   const [mobileViewTab, setMobileViewTab] = useState<'stage' | 'code'>('stage');
 
@@ -758,15 +811,17 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col bg-amber-50 select-none">
+    <div className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-amber-50 select-none">
       {/* Top Header */}
       <Header
         projectName={currentProject.name}
         showGrid={showGrid}
         isPresentation={isPresentation}
         isRunning={isRunning}
+        isBrowserFullscreen={isBrowserFullscreen}
         canUndo={history.length > 0}
         onUndo={handleUndo}
+        onToggleBrowserFullscreen={handleToggleBrowserFullscreen}
         onGoHome={() => {
           handleStop();
           setCurrentProjectId(null);
@@ -780,6 +835,16 @@ export default function App() {
         onStop={handleStop}
         onOpenGuide={() => setShowGuide(true)}
         onExportProject={() => handleExportProject(currentProject)}
+        onImportProjectFromFile={(imported) => {
+          handleImportProject(imported);
+          setHistory([]);
+          sound.playCheer();
+          confetti({
+            particleCount: 50,
+            spread: 70,
+            origin: { y: 0.6 },
+          });
+        }}
       />
 
       {/* Main Workspace */}

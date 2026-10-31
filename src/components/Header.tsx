@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { sound } from '../utils/audio';
+import { Project } from '../types/scratch';
 import {
   Home,
   Grid,
@@ -9,10 +10,14 @@ import {
   Square,
   Maximize2,
   Minimize2,
+  Expand,
+  Shrink,
   HelpCircle,
   Share2,
+  FolderDown,
   Edit2,
   Check,
+  Tv,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -20,8 +25,10 @@ interface HeaderProps {
   showGrid: boolean;
   isPresentation: boolean;
   isRunning: boolean;
+  isBrowserFullscreen?: boolean;
   canUndo?: boolean;
   onUndo?: () => void;
+  onToggleBrowserFullscreen?: () => void;
   onGoHome: () => void;
   onRenameProject: (newName: string) => void;
   onToggleGrid: () => void;
@@ -31,6 +38,7 @@ interface HeaderProps {
   onStop: () => void;
   onOpenGuide: () => void;
   onExportProject: () => void;
+  onImportProjectFromFile?: (project: Project) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -38,8 +46,10 @@ export const Header: React.FC<HeaderProps> = ({
   showGrid,
   isPresentation,
   isRunning,
+  isBrowserFullscreen = false,
   canUndo = false,
   onUndo,
+  onToggleBrowserFullscreen,
   onGoHome,
   onRenameProject,
   onToggleGrid,
@@ -49,9 +59,11 @@ export const Header: React.FC<HeaderProps> = ({
   onStop,
   onOpenGuide,
   onExportProject,
+  onImportProjectFromFile,
 }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState(projectName);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFinishRename = () => {
     setIsEditingTitle(false);
@@ -60,6 +72,35 @@ export const Header: React.FC<HeaderProps> = ({
     } else {
       setTitleInput(projectName);
     }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target?.result as string);
+        if (parsed && parsed.pages && Array.isArray(parsed.pages)) {
+          const projectWithNewId: Project = {
+            ...parsed,
+            id: `proj_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+            name: parsed.name ? `${parsed.name} (Wczytany)` : 'Wczytany Projekt',
+            updatedAt: Date.now(),
+          };
+          if (onImportProjectFromFile) {
+            onImportProjectFromFile(projectWithNewId);
+          }
+        } else {
+          alert('Wybrany plik nie zawiera poprawnego projektu ScratchJr.');
+        }
+      } catch {
+        alert('Nie udało się odczytać pliku JSON.');
+      }
+    };
+    reader.readAsText(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   return (
@@ -136,7 +177,34 @@ export const Header: React.FC<HeaderProps> = ({
           <Undo2 size={18} strokeWidth={2.5} />
         </button>
 
-        {/* Fullscreen / Presentation Mode */}
+        {/* Browser Fullscreen (Hides phone browser address bar) */}
+        {onToggleBrowserFullscreen && (
+          <button
+            type="button"
+            onClick={() => {
+              sound.playPop();
+              onToggleBrowserFullscreen();
+            }}
+            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl border-2 transition-transform active:scale-95 flex items-center justify-center shadow-xs ${
+              isBrowserFullscreen
+                ? 'bg-amber-900 text-amber-100 border-amber-950 shadow-inner'
+                : 'bg-white hover:bg-amber-100 text-amber-950 border-amber-600'
+            }`}
+            title={
+              isBrowserFullscreen
+                ? 'Wyjdź z pełnego ekranu'
+                : 'Pełny ekran (ukryj pasek adresu przeglądarki)'
+            }
+          >
+            {isBrowserFullscreen ? (
+              <Shrink size={18} strokeWidth={2.5} />
+            ) : (
+              <Expand size={18} strokeWidth={2.5} />
+            )}
+          </button>
+        )}
+
+        {/* Presentation Mode (Big Stage View) */}
         <button
           type="button"
           onClick={() => {
@@ -148,9 +216,9 @@ export const Header: React.FC<HeaderProps> = ({
               ? 'bg-amber-900 text-amber-100 border-amber-950 shadow-inner'
               : 'bg-white hover:bg-amber-100 text-amber-950 border-amber-600'
           }`}
-          title={isPresentation ? 'Wyjdź z trybu pełnoekranowego' : 'Tryb prezentacji (Duży ekran)'}
+          title={isPresentation ? 'Pokaż bloczki (Wyjdź z samej sceny)' : 'Tryb samej sceny (Prezentacja)'}
         >
-          {isPresentation ? <Minimize2 size={18} strokeWidth={2.5} /> : <Maximize2 size={18} strokeWidth={2.5} />}
+          {isPresentation ? <Minimize2 size={18} strokeWidth={2.5} /> : <Tv size={18} strokeWidth={2.5} />}
         </button>
 
         {/* 20x15 Coordinate Grid Toggle */}
@@ -222,6 +290,30 @@ export const Header: React.FC<HeaderProps> = ({
           <HelpCircle size={19} strokeWidth={2.5} />
         </button>
 
+        {/* Hidden file input for importing JSON */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+
+        {/* Import JSON from file */}
+        {onImportProjectFromFile && (
+          <button
+            type="button"
+            onClick={() => {
+              sound.playPop();
+              fileInputRef.current?.click();
+            }}
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-amber-200 hover:bg-amber-300 active:scale-95 text-amber-950 border-2 border-amber-500 flex items-center justify-center transition-transform"
+            title="Wgraj projekt z pliku JSON (Otwórz plik)"
+          >
+            <FolderDown size={18} strokeWidth={2.5} />
+          </button>
+        )}
+
         {/* Export / Share */}
         <button
           type="button"
@@ -230,7 +322,7 @@ export const Header: React.FC<HeaderProps> = ({
             onExportProject();
           }}
           className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-amber-200 hover:bg-amber-300 active:scale-95 text-amber-950 border-2 border-amber-500 flex items-center justify-center transition-transform"
-          title="Eksportuj projekt (plik JSON do udostępnienia)"
+          title="Eksportuj projekt (Zapisz jako plik JSON do udostępnienia)"
         >
           <Share2 size={18} strokeWidth={2.5} />
         </button>

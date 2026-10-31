@@ -223,6 +223,16 @@ export const GuideModal: React.FC<GuideModalProps> = ({ onClose }) => {
                     Całość możesz umieścić na darmowym <strong>GitHub Pages</strong> — aplikacja nie potrzebuje żadnego zewnętrznego serwera ani baz danych. Działa w 100% w przeglądarce i jest bezpieczna dla dzieci!
                   </li>
                 </ol>
+
+                <div className="mt-4 p-3 bg-amber-100 rounded-2xl border border-amber-300">
+                  <h5 className="font-black text-amber-950 text-xs flex items-center gap-1.5 mb-1">
+                    <span>📱 Pełny ekran bez paska adresu na telefonie:</span>
+                  </h5>
+                  <p className="text-xs text-amber-900 font-semibold leading-relaxed">
+                    1. Kliknij przycisk <strong>Pełny ekran (ikona rozszerzających się strzałek)</strong> w górnym pasku, aby natychmiast ukryć pasek adresu przeglądarki.<br />
+                    2. Lub w menu przeglądarki na telefonie kliknij <strong>„Dodaj do ekranu głównego” / „Zainstaluj aplikację”</strong> — gra otworzy się wtedy w trybie pełnoekranowym bez żadnych ramek przeglądarki, dokładnie jak aplikacja ze sklepu Google Play!
+                  </p>
+                </div>
               </div>
             </div>
           )}

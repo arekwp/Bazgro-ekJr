@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" rx="40" fill="#F59E0B"/>
+  <rect x="16" y="16" width="160" height="160" rx="32" fill="#FBBF24"/>
+  <!-- Robot Icon -->
+  <line x1="96" y1="46" x2="96" y2="28" stroke="#334155" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="96" cy="24" r="8" fill="#EF4444"/>
+  <rect x="52" y="46" width="88" height="60" rx="14" fill="#0EA5E9" stroke="#0284C7" stroke-width="4"/>
+  <rect x="62" y="56" width="68" height="34" rx="8" fill="#0F172A"/>
+  <circle cx="80" cy="73" r="8" fill="#38BDF8"/>
+  <circle cx="112" cy="73" r="8" fill="#38BDF8"/>
+  <rect x="86" y="106" width="20" height="10" fill="#64748B"/>
+  <rect x="58" y="116" width="76" height="44" rx="10" fill="#0284C7"/>
+  <circle cx="78" cy="136" r="5" fill="#EF4444"/>
+  <circle cx="96" cy="136" r="5" fill="#10B981"/>
+  <circle cx="114" cy="136" r="5" fill="#F59E0B"/>
+</svg>
