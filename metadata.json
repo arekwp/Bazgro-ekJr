@@ -1,0 +1,6 @@
+{
+  "name": "ScratchJr Web - Programowanie i Robotyka dla Dzieci",
+  "description": "Przeglądarkowy klon ScratchJr stworzony z myślą o telefonach i tabletach. Wizualne programowanie bloczkowe dla dzieci i młodych adeptów robotyki.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
